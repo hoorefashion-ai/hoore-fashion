@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Updated colors to Pink theme */
+        :root {
+            --primary-color: #ec4899; /* Pink-500 */
+            --primary-hover: #db2777; /* Pink-600 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefcfd; /* Very light, almost white background */
+        }
+        .scrollable-cart {
+            max-height: 70vh; /* Limit height for aesthetic on large screens */
+            overflow-y: auto;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scrollable-cart::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Firebase Initialization (Required for Environment) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Global variables MUST be used if defined
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let userId = 'anonymous';
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Authenticate user using custom token or anonymously
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken)
+                        .then((userCredential) => {
+                            userId = userCredential.user.uid;
+                        })
+                        .catch((error) => {
+                            console.error("Firebase Custom Token sign-in failed:", error);
+                            signInAnonymously(auth).then(userCredential => { userId = userCredential.user.uid; });
+                        });
+                } else {
+                    signInAnonymously(auth).then(userCredential => { userId = userCredential.user.uid; });
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.warn("Firebase config not available. Running in local mode.");
+        }
+    </script>
+
+    <div class="min-h-screen py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight text-center">Your Shopping Cart</h1>
+        </header>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+            <!-- Cart Items List (2/3 width on large screens) -->
+            <div class="lg:col-span-2 bg-white shadow-xl rounded-2xl p-6 lg:p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-4">
+                    Items in Cart (<span id="item-count">0</span>)
+                </h2>
+
+                <!-- Scrollable Area for Items -->
+                <div id="cart-items-container" class="scrollable-cart space-y-6">
+                    <!-- Cart items will be dynamically injected here -->
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <!-- Updated to pink color -->
+                    <a href="#" class="text-sm font-medium text-pink-600 hover:text-pink-500 flex items-center">
+                        <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary (1/3 width on large screens) -->
+            <div class="lg:col-span-1 bg-white shadow-xl rounded-2xl p-6 lg:p-8 sticky top-8 h-fit">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-4">
+                    Order Summary
+                </h2>
+
+                <div class="space-y-4 text-gray-700">
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal" class="font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Shipping Estimate</span>
+                        <span class="font-medium text-green-600">Free</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-4">
+                        <span>Tax Estimate (10%)</span>
+                        <span id="summary-tax" class="font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between pt-4 text-xl font-bold text-gray-900">
+                        <span>Order Total</span>
+                        <span id="summary-total">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Updated to pink color -->
+                <button id="checkout-btn" class="mt-8 w-full py-3 bg-pink-500 text-white font-semibold rounded-xl shadow-lg hover:bg-pink-600 transition duration-150 ease-in-out focus:outline-none focus:ring-4 focus:ring-pink-500 focus:ring-opacity-50">
+                    Proceed to Checkout
+                </button>
+
+                <p id="checkout-message" class="text-center text-sm mt-4 text-red-600 hidden">Cart is empty!</p>
+
+                <p class="text-center text-xs text-gray-500 mt-6">
+                    Taxes and shipping calculated at checkout.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Mock data for the shopping cart - Updated placeholder color to pink (#ec4899)
+        let cartItems = [
+            { id: 1, name: "Luxury Mechanical Keyboard (65%)", price: 189.99, quantity: 1, image: "https://placehold.co/100x100/ec4899/ffffff?text=KB" },
+            { id: 2, name: "Ergonomic Vertical Mouse", price: 45.50, quantity: 2, image: "https://placehold.co/100x100/ec4899/ffffff?text=Mouse" },
+            { id: 3, name: "4K USB-C Monitor Cable (2m)", price: 19.99, quantity: 3, image: "https://placehold.co/100x100/ec4899/ffffff?text=Cable" }
+        ];
+
+        const TAX_RATE = 0.10; // 10% tax rate
+        const cartContainer = document.getElementById('cart-items-container');
+        const itemCountSpan = document.getElementById('item-count');
+        const subtotalSpan = document.getElementById('summary-subtotal');
+        const taxSpan = document.getElementById('summary-tax');
+        const totalSpan = document.getElementById('summary-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const checkoutMessage = document.getElementById('checkout-message');
+
+        /**
+         * Formats a number as currency (USD).
+         * @param {number} amount
+         * @returns {string}
+         */
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(amount);
+        };
+
+        /**
+         * Calculates and updates the cart totals.
+         */
+        const updateCartTotals = () => {
+            let subtotal = 0;
+            let totalItems = 0;
+
+            cartItems.forEach(item => {
+                subtotal += item.price * item.quantity;
+                totalItems += item.quantity;
+            });
+
+            const tax = subtotal * TAX_RATE;
+            const grandTotal = subtotal + tax;
+
+            // Update DOM elements
+            itemCountSpan.textContent = totalItems;
+            subtotalSpan.textContent = formatCurrency(subtotal);
+            taxSpan.textContent = formatCurrency(tax);
+            totalSpan.textContent = formatCurrency(grandTotal);
+
+            // Handle empty cart state - logic updated for pink theme classes
+            if (cartItems.length === 0) {
+                checkoutBtn.disabled = true;
+                // Remove pink classes and add gray/disabled classes
+                checkoutBtn.classList.remove('bg-pink-500', 'hover:bg-pink-600', 'focus:ring-pink-500'); 
+                checkoutBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                checkoutBtn.textContent = 'Cart is Empty';
+                checkoutMessage.classList.remove('hidden');
+            } else {
+                checkoutBtn.disabled = false;
+                // Add pink classes and remove gray/disabled classes
+                checkoutBtn.classList.add('bg-pink-500', 'hover:bg-pink-600');
+                checkoutBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                checkoutBtn.textContent = 'Proceed to Checkout';
+                checkoutMessage.classList.add('hidden');
+            }
+        };
+
+        /**
+         * Renders the entire list of cart items.
+         */
+        const renderCartItems = () => {
+            cartContainer.innerHTML = '';
+            if (cartItems.length === 0) {
+                cartContainer.innerHTML = `
+                    <div class="py-10 text-center text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <p class="text-lg font-semibold">Your cart is empty.</p>
+                        <p class="text-sm">Time to find some great deals!</p>
+                    </div>
+                `;
+                updateCartTotals();
+                return;
+            }
+
+            cartItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+
+                const itemHtml = `
+                    <div id="item-${item.id}" class="flex flex-col sm:flex-row items-center border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition duration-200">
+                        <!-- Item Image -->
+                        <div class="flex-shrink-0 w-24 h-24 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-200 mb-4 sm:mb-0 sm:mr-6">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                        </div>
+
+                        <!-- Item Details -->
+                        <div class="flex-grow w-full sm:w-auto">
+                            <h3 class="text-lg font-semibold text-gray-900 leading-tight">${item.name}</h3>
+                            <p class="text-sm text-gray-500 mt-1">Price: ${formatCurrency(item.price)}</p>
+
+                            <div class="flex items-center mt-3 justify-between sm:justify-start space-x-4">
+                                <!-- Quantity Controls -->
+                                <div class="flex items-center border border-gray-300 rounded-lg">
+                                    <button onclick="changeQuantity(${item.id}, -1)" class="p-2 text-gray-600 hover:text-pink-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                                    </button>
+                                    <input id="quantity-${item.id}" type="number" value="${item.quantity}" min="1"
+                                           onchange="manualQuantityChange(${item.id}, this.value)"
+                                           class="w-12 text-center border-l border-r border-gray-300 p-1 text-sm font-medium focus:outline-none">
+                                    <button onclick="changeQuantity(${item.id}, 1)" class="p-2 text-gray-600 hover:text-pink-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    </button>
+                                </div>
+
+                                <!-- Total for Item -->
+                                <p class="text-xl font-bold text-gray-900 ml-auto sm:ml-6">
+                                    ${formatCurrency(itemTotal)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Remove Button (Absolute position on small screens, flex on large) -->
+                        <button onclick="removeItem(${item.id})" class="absolute top-2 right-2 sm:relative sm:top-auto sm:right-auto sm:ml-6 text-gray-400 hover:text-red-500 transition duration-150 p-2 sm:p-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                `;
+                cartContainer.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            updateCartTotals();
+        };
+
+        /**
+         * Changes the quantity of an item.
+         * @param {number} itemId
+         * @param {number} delta - either 1 or -1
+         */
+        window.changeQuantity = (itemId, delta) => {
+            const item = cartItems.find(i => i.id === itemId);
+            if (item) {
+                const newQuantity = item.quantity + delta;
+                if (newQuantity < 1) {
+                    removeItem(itemId);
+                } else {
+                    item.quantity = newQuantity;
+                    // Update input field value
+                    document.getElementById(`quantity-${itemId}`).value = newQuantity;
+                    renderCartItems(); // Re-render to update item totals
+                }
+            }
+        };
+
+        /**
+         * Handles manual input changes for quantity.
+         * @param {number} itemId
+         * @param {string} value
+         */
+        window.manualQuantityChange = (itemId, value) => {
+            const newQuantity = parseInt(value);
+            const item = cartItems.find(i => i.id === itemId);
+
+            if (item) {
+                if (newQuantity < 1 || isNaN(newQuantity)) {
+                    // Reset to last valid quantity if invalid input
+                    document.getElementById(`quantity-${itemId}`).value = item.quantity;
+                    return;
+                }
+                item.quantity = newQuantity;
+                renderCartItems();
+            }
+        };
+
+        /**
+         * Removes an item from the cart.
+         * @param {number} itemId
+         */
+        window.removeItem = (itemId) => {
+            cartItems = cartItems.filter(i => i.id !== itemId);
+            renderCartItems();
+        };
+
+        /**
+         * Handles the checkout button click (mock behavior).
+         */
+        checkoutBtn.addEventListener('click', () => {
+            if (cartItems.length > 0) {
+                alertUser("Thank you! Proceeding to the checkout process.", "success");
+                // In a real app, this would redirect to checkout.html or a payment gateway
+            } else {
+                 alertUser("Cannot proceed: Your cart is empty!", "error");
+            }
+        });
+
+        /**
+         * Custom alert/message box function.
+         * @param {string} message
+         * @param {string} type - 'success' or 'error'
+         */
+        function alertUser(message, type) {
+            let messageBox = document.getElementById('message-box');
+            if (!messageBox) {
+                messageBox = document.createElement('div');
+                messageBox.id = 'message-box';
+                messageBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-xl shadow-2xl z-50 text-white transition-opacity duration-300';
+                document.body.appendChild(messageBox);
+            }
+
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-green-600', 'bg-red-600', 'opacity-0');
+
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-600');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-600');
+            }
+
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        // Initial render when the page loads
+        window.onload = renderCartItems;
+    </script>
+</body>
+</html>

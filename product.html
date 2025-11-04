@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chic Pink Summer Dress | Chic Boutique</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Pink Theme Variables */
+        :root {
+            --primary-color: #ec4899; /* Pink-500 */
+            --primary-hover: #db2777; /* Pink-600 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefcfd; /* Very light, almost white background */
+        }
+        .main-image {
+            aspect-ratio: 4 / 5; /* Common aspect ratio for fashion photos */
+            object-fit: cover;
+        }
+        /* Custom ring color for focus states */
+        .ring-pink-500:focus {
+            --tw-ring-color: #ec4899;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Firebase Initialization and User ID Display Script (for consistency) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Global variables MUST be used if defined
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let auth;
+        let userId = 'anonymous';
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                getFirestore(app); // Initialize Firestore instance
+
+                const setUserId = (uid) => {
+                    userId = uid;
+                    const userIdElement = document.getElementById('user-id-display');
+                    if (userIdElement) {
+                        userIdElement.textContent = userId;
+                    }
+                };
+
+                // Authenticate user using custom token or anonymously
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken)
+                        .then((userCredential) => {
+                            setUserId(userCredential.user.uid);
+                            console.log("Firebase signed in with custom token.");
+                        })
+                        .catch((error) => {
+                            console.error("Firebase Custom Token sign-in failed:", error);
+                            signInAnonymously(auth).then(userCredential => { 
+                                setUserId(userCredential.user.uid); 
+                                console.log("Firebase signed in anonymously due to error.");
+                            });
+                        });
+                } else {
+                    signInAnonymously(auth).then(userCredential => { 
+                        setUserId(userCredential.user.uid);
+                        console.log("Firebase signed in anonymously."); 
+                    });
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.warn("Firebase config not available. Running in local mode.");
+        }
+    </script>
+
+    <div class="min-h-screen py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+        <header class="mb-4">
+            <nav class="text-sm text-gray-500 mb-6">
+                <a href="#" class="hover:text-pink-500">Home</a> / 
+                <a href="#" class="hover:text-pink-500">Dresses</a> / 
+                <span class="font-medium text-pink-500">Chic Pink Summer Dress</span>
+            </nav>
+            <!-- User ID Display - MANDATORY for multi-user apps -->
+            <p class="text-xs text-gray-500 text-right">
+                User ID: <span id="user-id-display" class="font-mono text-pink-600 break-all">Authenticating...</span>
+            </p>
+        </header>
+
+        <main class="max-w-7xl mx-auto">
+            <!-- Product Section: Image Gallery & Details -->
+            <div class="lg:grid lg:grid-cols-2 lg:gap-10 xl:gap-16 bg-white shadow-xl rounded-2xl p-6 md:p-10">
+                
+                <!-- Left Column: Images -->
+                <div class="lg:col-span-1">
+                    <div class="flex flex-col-reverse lg:flex-row gap-4">
+                        <!-- Thumbnails (Hidden on small mobile, visible on larger screens) -->
+                        <div class="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-visible">
+                            <div class="w-20 h-24 lg:w-24 lg:h-28 rounded-xl border-2 border-pink-500 cursor-pointer flex-shrink-0">
+                                <img src="https://placehold.co/90x110/fbcfe8/be185d?text=Pink+Front" alt="Front view" class="main-image rounded-lg">
+                            </div>
+                            <div class="w-20 h-24 lg:w-24 lg:h-28 rounded-xl border border-gray-200 hover:border-pink-300 cursor-pointer flex-shrink-0">
+                                <img src="https://placehold.co/90x110/fbcfe8/be185d?text=Model+Shot" alt="Model wearing dress" class="main-image rounded-lg">
+                            </div>
+                            <div class="w-20 h-24 lg:w-24 lg:h-28 rounded-xl border border-gray-200 hover:border-pink-300 cursor-pointer flex-shrink-0">
+                                <img src="https://placehold.co/90x110/fbcfe8/be185d?text=Fabric+Detail" alt="Fabric detail" class="main-image rounded-lg">
+                            </div>
+                        </div>
+
+                        <!-- Main Image -->
+                        <div class="flex-1 min-w-0">
+                            <img src="https://placehold.co/800x1000/fbcfe8/be185d?text=Chic+Pink+Summer+Dress" 
+                                 alt="Main product image: Chic Pink Summer Dress" 
+                                 class="w-full rounded-2xl shadow-lg main-image">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Details & Actions -->
+                <div class="lg:col-span-1 mt-8 lg:mt-0">
+                    <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Chic Pink Summer Dress</h1>
+                    
+                    <div class="flex items-center space-x-3 mb-6">
+                        <!-- Rating Stars (Mock) -->
+                        <div class="flex text-yellow-400">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        </div>
+                        <p class="text-sm text-gray-500">(15 Reviews)</p>
+                    </div>
+
+                    <p class="text-4xl font-bold text-gray-900 mb-6">$59.99</p>
+
+                    <!-- Description -->
+                    <p class="text-gray-600 mb-8 leading-relaxed">
+                        Step out in style with our Chic Pink Summer Dress. Made from a lightweight, breathable linen blend, 
+                        this dress features a delicate sweetheart neckline and an adjustable sash tie. Perfect for garden parties, 
+                        beach days, or a casual, elegant look. Available in limited quantities.
+                    </p>
+
+                    <!-- Size Selector -->
+                    <div class="mb-8">
+                        <label class="block text-lg font-semibold text-gray-800 mb-3">Size</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="size-option px-4 py-2 border-2 border-gray-200 rounded-full text-sm font-medium hover:bg-pink-50 hover:border-pink-500 transition duration-150">XS</button>
+                            <button class="size-option px-4 py-2 border-2 border-pink-500 bg-pink-50 rounded-full text-sm font-medium text-pink-700">S</button>
+                            <button class="size-option px-4 py-2 border-2 border-gray-200 rounded-full text-sm font-medium hover:bg-pink-50 hover:border-pink-500 transition duration-150">M</button>
+                            <button class="size-option px-4 py-2 border-2 border-gray-200 rounded-full text-sm font-medium hover:bg-pink-50 hover:border-pink-500 transition duration-150">L</button>
+                            <button class="size-option px-4 py-2 border-2 border-gray-200 rounded-full text-sm font-medium hover:bg-pink-50 hover:border-pink-500 transition duration-150 opacity-50 cursor-not-allowed" disabled>XL</button>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-2">XL is currently out of stock.</p>
+                    </div>
+
+                    <!-- Quantity and Add to Cart -->
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-10">
+                        <input type="number" value="1" min="1" max="10" class="w-full sm:w-20 p-3 border border-gray-300 rounded-xl focus:ring-pink-500 focus:border-pink-500 text-center font-medium">
+                        
+                        <button class="flex-1 py-3 bg-pink-500 text-white text-lg font-semibold rounded-xl shadow-lg shadow-pink-200 hover:bg-pink-600 transition duration-200 flex items-center justify-center" onclick="addToCart()">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            Add to Cart
+                        </button>
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div class="border-t pt-4 space-y-2 text-sm text-gray-500">
+                        <p><strong>SKU:</strong> CHIC-PNK-S</p>
+                        <p><strong>Category:</strong> Women's Dresses, Summer Collection</p>
+                        <p><strong>Shipping:</strong> Free shipping on orders over $100.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full-Width Details & Reviews Section -->
+            <div class="max-w-7xl mx-auto mt-12">
+                <div class="bg-white shadow-xl rounded-2xl p-6 md:p-10">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 border-b pb-3">Product Specifications</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8 text-gray-600">
+                        <div>
+                            <h3 class="font-semibold text-lg text-pink-600 mb-2">Material & Care</h3>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li>50% Linen, 50% Cotton Blend</li>
+                                <li>Machine wash cold, gentle cycle</li>
+                                <li>Line dry recommended</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-pink-600 mb-2">Features</h3>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li>Sweetheart neckline</li>
+                                <li>Adjustable shoulder straps</li>
+                                <li>Side zipper closure</li>
+                                <li>Pockets: Yes, hidden side pockets</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg text-pink-600 mb-2">Delivery & Returns</h3>
+                            <ul class="list-disc list-inside space-y-1 text-sm">
+                                <li>Standard Delivery: 5-7 working days</li>
+                                <li>Express Delivery: 2-3 working days</li>
+                                <li>30-day free returns policy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Reviews Section -->
+            <div class="max-w-7xl mx-auto mt-12">
+                <div class="bg-white shadow-xl rounded-2xl p-6 md:p-10">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 border-b pb-3">Customer Reviews (15)</h2>
+                    
+                    <div class="space-y-8">
+                        <!-- Review 1 -->
+                        <div class="border-b pb-4">
+                            <div class="flex items-center text-yellow-400 mb-1">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="font-semibold text-gray-800">Perfect Fit and Color!</p>
+                            <p class="text-sm text-gray-500 mb-3">Reviewed by Sarah J. on Oct 20, 2024</p>
+                            <p class="text-gray-600">This dress is everything I hoped for. The pink is vibrant but classy, and the linen blend is so comfortable for warm weather. True to size, highly recommend!</p>
+                        </div>
+
+                        <!-- Review 2 -->
+                        <div class="border-b pb-4">
+                            <div class="flex items-center text-yellow-400 mb-1">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.817 2.046a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.817-2.046a1 1 0 00-1.175 0l-2.817 2.046c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="font-semibold text-gray-800">Great Value</p>
+                            <p class="text-sm text-gray-500 mb-3">Reviewed by Alex T. on Sep 1, 2024</p>
+                            <p class="text-gray-600">Wish the material was slightly heavier, but for the price, this is a fantastic buy. It photographs beautifully!</p>
+                        </div>
+                        
+                        <div class="text-center pt-4">
+                            <button class="text-pink-600 hover:text-pink-700 font-medium transition duration-150 border border-pink-100 bg-pink-50 px-6 py-3 rounded-xl shadow-sm hover:shadow-md" onclick="alertUser('Loading all 15 reviews...', 'success')">
+                                Read All Customer Reviews
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Global Message Box (from account.html) -->
+    <script>
+        /**
+         * Custom alert/message box function.
+         * @param {string} message
+         * @param {string} type - 'success' or 'error'
+         */
+        function alertUser(message, type) {
+            let messageBox = document.getElementById('message-box');
+            if (!messageBox) {
+                messageBox = document.createElement('div');
+                messageBox.id = 'message-box';
+                messageBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-xl shadow-2xl z-50 text-white transition-opacity duration-300';
+                document.body.appendChild(messageBox);
+            }
+
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-green-600', 'bg-red-600', 'opacity-0');
+
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-600');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-600');
+            }
+
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        function addToCart() {
+            // In a real application, this would capture selected size, quantity, and send to the server.
+            const quantity = document.querySelector('input[type="number"]').value;
+            alertUser(`${quantity} x Chic Pink Summer Dress added to cart!`, 'success');
+        }
+
+        // Add event listeners to size buttons (mock selection logic)
+        document.addEventListener('DOMContentLoaded', () => {
+            const sizeOptions = document.querySelectorAll('.size-option:not([disabled])');
+            sizeOptions.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active state from all
+                    sizeOptions.forEach(btn => {
+                        btn.classList.remove('border-pink-500', 'bg-pink-50', 'text-pink-700');
+                        btn.classList.add('border-gray-200');
+                    });
+
+                    // Add active state to clicked button
+                    button.classList.add('border-pink-500', 'bg-pink-50', 'text-pink-700');
+                    button.classList.remove('border-gray-200');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

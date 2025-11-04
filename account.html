@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Chic Boutique</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Pink Theme Variables */
+        :root {
+            --primary-color: #ec4899; /* Pink-500 */
+            --primary-hover: #db2777; /* Pink-600 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefcfd; /* Very light, almost white background */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Firebase Initialization and User ID Display Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Global variables MUST be used if defined
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let auth;
+        let userId = 'anonymous';
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                getFirestore(app); // Initialize Firestore instance
+
+                const setUserId = (uid) => {
+                    userId = uid;
+                    const userIdElement = document.getElementById('user-id-display');
+                    if (userIdElement) {
+                        userIdElement.textContent = userId;
+                    }
+                };
+
+                // Authenticate user using custom token or anonymously
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken)
+                        .then((userCredential) => {
+                            setUserId(userCredential.user.uid);
+                            console.log("Firebase signed in with custom token.");
+                        })
+                        .catch((error) => {
+                            console.error("Firebase Custom Token sign-in failed:", error);
+                            signInAnonymously(auth).then(userCredential => { 
+                                setUserId(userCredential.user.uid); 
+                                console.log("Firebase signed in anonymously due to error.");
+                            });
+                        });
+                } else {
+                    signInAnonymously(auth).then(userCredential => { 
+                        setUserId(userCredential.user.uid);
+                        console.log("Firebase signed in anonymously."); 
+                    });
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.warn("Firebase config not available. Running in local mode.");
+        }
+    </script>
+
+    <div class="min-h-screen py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+        <header class="mb-10">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight text-center">My Account Dashboard</h1>
+            <!-- User ID Display - MANDATORY for multi-user apps -->
+            <p class="text-center text-sm mt-2 text-gray-500">
+                Logged in as: <span id="user-id-display" class="font-mono text-pink-600 break-all">Authenticating...</span>
+            </p>
+        </header>
+
+        <!-- Main Content Area (Now full width) -->
+        <div class="max-w-4xl mx-auto space-y-10">
+
+            <!-- 1. Profile Details -->
+            <section id="profile" class="bg-white shadow-xl rounded-2xl p-6 lg:p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-8 h-8 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    Profile Details
+                </h2>
+                
+                <form class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" id="name" value="Jane Doe" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-pink-500 focus:border-pink-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="email" value="jane.doe@example.com" disabled class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 bg-gray-50 cursor-not-allowed">
+                        <p class="mt-1 text-xs text-gray-500">Email address cannot be changed here.</p>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="text" id="phone" value="(555) 123-4567" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-pink-500 focus:border-pink-500">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-pink-500 text-white font-semibold rounded-xl shadow-lg hover:bg-pink-600 transition duration-150" onclick="event.preventDefault(); alertUser('Profile Updated!', 'success')">
+                        Save Changes
+                    </button>
+                </form>
+            </section>
+
+            <!-- 2. Order History -->
+            <section id="orders" class="bg-white shadow-xl rounded-2xl p-6 lg:p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-8 h-8 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-3 3l-3 3m0 0l3 3m-3-3h8m-3 6h.01"></path></svg>
+                    Recent Orders
+                </h2>
+                
+                <div id="order-history" class="space-y-4">
+                    <!-- Mock Orders -->
+                    <div class="border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition duration-200 flex flex-wrap justify-between items-center">
+                        <div class="mb-2 sm:mb-0">
+                            <p class="font-bold text-gray-900">Order #CB-10294</p>
+                            <p class="text-sm text-gray-500">Placed on Oct 2, 2024</p>
+                        </div>
+                        <p class="text-lg font-semibold text-pink-600 mr-4">$189.99</p>
+                        <span class="text-sm px-3 py-1 bg-green-100 text-green-700 rounded-full mr-4">Delivered</span>
+                        <button class="text-pink-500 hover:text-pink-700 text-sm font-medium mt-2 sm:mt-0" onclick="alertUser('Viewing details for Order #CB-10294', 'success')">View Details</button>
+                    </div>
+                    <div class="border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition duration-200 flex flex-wrap justify-between items-center">
+                        <div class="mb-2 sm:mb-0">
+                            <p class="font-bold text-gray-900">Order #CB-10115</p>
+                            <p class="text-sm text-gray-500">Placed on Aug 15, 2024</p>
+                        </div>
+                        <p class="text-lg font-semibold text-pink-600 mr-4">$59.99</p>
+                        <span class="text-sm px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full mr-4">Processing</span>
+                        <button class="text-pink-500 hover:text-pink-700 text-sm font-medium mt-2 sm:mt-0" onclick="alertUser('Viewing details for Order #CB-10115', 'success')">View Details</button>
+                    </div>
+                    <div class="border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition duration-200 flex flex-wrap justify-between items-center">
+                        <div class="mb-2 sm:mb-0">
+                            <p class="font-bold text-gray-900">Order #CB-10001</p>
+                            <p class="text-sm text-gray-500">Placed on Jun 1, 2024</p>
+                        </div>
+                        <p class="text-lg font-semibold text-pink-600 mr-4">$29.50</p>
+                        <span class="text-sm px-3 py-1 bg-gray-100 text-gray-700 rounded-full mr-4">Cancelled</span>
+                        <button class="text-pink-500 hover:text-pink-700 text-sm font-medium mt-2 sm:mt-0" onclick="alertUser('Viewing details for Order #CB-10001', 'success')">View Details</button>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <a href="#" class="text-pink-600 hover:text-pink-700 font-medium transition duration-150">
+                        View All Orders &rarr;
+                    </a>
+                </div>
+            </section>
+
+            <!-- 3. Account Settings -->
+            <section id="settings" class="bg-white shadow-xl rounded-2xl p-6 lg:p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-8 h-8 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Account Settings
+                </h2>
+
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+                        <label for="newsletter" class="text-gray-700 font-medium">Email Newsletter</label>
+                        <input type="checkbox" id="newsletter" checked class="h-6 w-6 text-pink-600 border-gray-300 rounded focus:ring-pink-500">
+                    </div>
+                    <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+                        <label class="text-gray-700 font-medium">Two-Factor Authentication</label>
+                        <button class="text-pink-500 hover:text-pink-700 text-sm font-medium" onclick="alertUser('2FA configuration initiated!', 'success')">Enable</button>
+                    </div>
+                    <div class="p-3 border border-red-100 bg-red-50 rounded-lg">
+                        <h4 class="font-semibold text-red-700">Danger Zone</h4>
+                        <p class="text-sm text-red-500 mb-3">Permanently close your account.</p>
+                        <button class="px-4 py-2 text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition duration-150 text-sm" onclick="alertUser('Account closure requires confirmation. This is a mock function.', 'error')">
+                            Deactivate Account
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Global Message Box (from cart.html) -->
+    <script>
+        /**
+         * Custom alert/message box function.
+         * @param {string} message
+         * @param {string} type - 'success' or 'error'
+         */
+        function alertUser(message, type) {
+            let messageBox = document.getElementById('message-box');
+            if (!messageBox) {
+                messageBox = document.createElement('div');
+                messageBox.id = 'message-box';
+                messageBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-xl shadow-2xl z-50 text-white transition-opacity duration-300';
+                document.body.appendChild(messageBox);
+            }
+
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-green-600', 'bg-red-600', 'opacity-0');
+
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-600');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-600');
+            }
+
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

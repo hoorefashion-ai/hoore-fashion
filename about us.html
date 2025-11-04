@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rayan - About Us</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons - Loaded for consistency -->
+    <!-- Note: While React components are linked, we use inline SVG for simplicity in HTML -->
+
+
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #111827;
+            /* Hide the default cursor */
+            cursor: none;
+        }
+
+        /* Custom Mouse Tracker */
+        #mouse-tracker {
+            position: fixed;
+            width: 32px; /* Larger, softer tracker */
+            height: 32px;
+            border: 2px solid #ec4899; /* Pink border */
+            border-radius: 50%;
+            pointer-events: none; /* Allows clicking through */
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        /* Mouse tracker "click" effect */
+        body.mouse-down #mouse-tracker {
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: rgba(236, 72, 153, 0.2); /* Soft pink fill on click */
+        }
+        
+        /* Hide mouse tracker on touch devices */
+        @media (pointer: coarse) {
+            #mouse-tracker {
+                display: none;
+            }
+            body {
+                cursor: auto;
+            }
+        }
+
+        /* "Logic-wise" Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf2f8; /* Light pink track */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ec4899; /* Main pink */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #db2777; /* Darker pink */
+        }
+    </style>
+</head>
+<body class="bg-white overflow-x-hidden">
+
+    <!-- Mouse Tracker Element -->
+    <div id="mouse-tracker"></div>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="text-3xl font-bold text-pink-500 hover:text-pink-600 transition-colors">
+                Chic Boutique
+            </a>
+
+            <!-- Desktop Navigation - UPDATED LINK HIGHLIGHT -->
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="index.html" class="text-gray-700 hover:text-pink-500 transition-colors">Home</a>
+                <a href="shop.html" class="text-gray-700 hover:text-pink-500 transition-colors">Shop</a>
+                <a href="new-arrivals.html" class="text-gray-700 hover:text-pink-500 transition-colors">New Arrivals</a>
+                <a href="about.html" class="text-pink-500 font-semibold transition-colors">About</a>
+            </div>
+
+            <!-- Icons -->
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-600 hover:text-pink-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+                <button class="text-gray-600 hover:text-pink-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
+                <button class="relative text-gray-600 hover:text-pink-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                </button>
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-pink-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu (Hidden by default) - UPDATED LINK HIGHLIGHT -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute top-full left-0 w-full">
+            <a href="index.html" class="block px-6 py-3 text-gray-700 hover:bg-pink-50 transition-colors">Home</a>
+            <a href="shop.html" class="block px-6 py-3 text-gray-700 hover:bg-pink-50 transition-colors">Shop</a>
+            <a href="new-arrivals.html" class="block px-6 py-3 text-gray-700 hover:bg-pink-50 transition-colors">New Arrivals</a>
+            <a href="about.html" class="block px-6 py-3 text-pink-500 hover:bg-pink-50 transition-colors">About</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20"> <!-- Padding top to offset fixed header -->
+        
+        <!-- About Us Header / Hero -->
+        <section class="py-20 bg-pink-50 animate-on-scroll">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-5xl font-bold text-gray-900 mb-4">The Chic Boutique Story</h1>
+                <p class="text-xl text-pink-600 font-medium max-w-3xl mx-auto">
+                    Where quality meets timeless style. We believe every piece of clothing should empower and inspire confidence.
+                </p>
+            </div>
+        </section>
+
+        <!-- Our Mission and Philosophy -->
+        <section class="py-24 bg-white">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <!-- Image Placeholder -->
+                <div class="animate-on-scroll">
+                    <img src="https://placehold.co/600x400/fecaca/9d174d?text=Mission+Vision" 
+                         alt="Stylish interior of a boutique store" 
+                         class="w-full h-80 object-cover rounded-xl shadow-2xl"
+                         onerror="this.src='https://placehold.co/600x400/fecaca/9d174d?text=Boutique+Interior'">
+                </div>
+
+                <!-- Text Content -->
+                <div class="animate-on-scroll" style="transition-delay: 200ms;">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-6 border-b-2 border-pink-500 pb-2 inline-block">Our Mission</h2>
+                    <p class="text-gray-700 text-lg mb-4">
+                        Chic Boutique was founded in 2018 with a simple goal: to move beyond fast fashion and offer **curated collections** of enduring quality. We select pieces that are versatile, beautifully crafted, and designed to last season after season.
+                    </p>
+                    <p class="text-gray-700 text-lg">
+                        Our philosophy centers on **intentional dressing**. We encourage our customers to build a wardrobe of meaningful items rather than transient trends, making sustainable choices effortless and glamorous.
+                    </p>
+                    <a href="shop.html" class="mt-6 inline-flex items-center text-pink-500 hover:text-pink-600 font-semibold transition-colors">
+                        Explore Our Curations 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Core Values Section -->
+        <section class="py-24 bg-pink-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl font-bold text-gray-900 mb-12 animate-on-scroll">Our Core Values</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Value 1: Quality Craftsmanship -->
+                    <div class="p-8 bg-white rounded-xl shadow-lg animate-on-scroll" style="transition-delay: 100ms;">
+                        <div class="text-pink-500 mb-4 mx-auto w-12 h-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Quality Craftsmanship</h3>
+                        <p class="text-gray-600">
+                            We meticulously vet our suppliers to ensure every fabric and stitch meets the highest standards of durability and comfort.
+                        </p>
+                    </div>
+
+                    <!-- Value 2: Conscious Style -->
+                    <div class="p-8 bg-white rounded-xl shadow-lg animate-on-scroll" style="transition-delay: 200ms;">
+                        <div class="text-pink-500 mb-4 mx-auto w-12 h-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Conscious Style</h3>
+                        <p class="text-gray-600">
+                            Sustainability is central. We prioritize ethical sourcing and transparent production processes to protect our planet.
+                        </p>
+                    </div>
+
+                    <!-- Value 3: Customer Confidence -->
+                    <div class="p-8 bg-white rounded-xl shadow-lg animate-on-scroll" style="transition-delay: 300ms;">
+                        <div class="text-pink-500 mb-4 mx-auto w-12 h-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><path d="M17 19.22H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14.22"></path><path d="M10 13H7v-3h3v3z"></path><path d="M7 17h6"></path><path d="M17 14h-2"></path><path d="M17 10h-2"></path><path d="M21 7h-2"></path><path d="M21 17h-2"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Customer Confidence</h3>
+                        <p class="text-gray-600">
+                            We are committed to exceptional customer service, ensuring you feel confident and supported every step of your shopping journey.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Call to Action -->
+        <section class="py-20 bg-pink-100/50">
+            <div class="container mx-auto px-6 text-center animate-on-scroll">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Discover Your Next Favorite Piece?</h2>
+                <p class="text-lg text-gray-700 mb-8">
+                    Browse our collections and experience the Chic Boutique difference today.
+                </p>
+                <a href="shop.html" class="bg-pink-500 text-white font-semibold py-3 px-10 rounded-full shadow-lg hover:bg-pink-600 transition-colors transform hover:scale-105 inline-block">
+                    Start Shopping Now
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-16">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Brand -->
+            <div>
+                <a href="index.html" class="text-3xl font-bold text-pink-400 mb-4 inline-block">
+                    Chic Boutique
+                </a>
+                <p class="text-gray-400">
+                    Curating the best styles for the modern individual.
+                </p>
+            </div>
+            <!-- Links -->
+            <div>
+                <h5 class="font-bold text-white text-lg mb-4">Shop</h5>
+                <ul class="space-y-2">
+                    <li><a href="new-arrivals.html" class="hover:text-pink-400 transition-colors">New Arrivals</a></li>
+                    <li><a href="shop.html" class="hover:text-pink-400 transition-colors">Dresses</a></li>
+                    <li><a href="shop.html" class="hover:text-pink-400 transition-colors">Tops</a></li>
+                    <li><a href="shop.html" class="hover:text-pink-400 transition-colors">Accessories</a></li>
+                </ul>
+            </div>
+            <!-- Company -->
+            <div>
+                <h5 class="font-bold text-white text-lg mb-4">Company</h5>
+                <ul class="space-y-2">
+                    <li><a href="about.html" class="hover:text-pink-400 transition-colors">About Us</a></li>
+                    <li><a href="#" class="hover:text-pink-400 transition-colors">Careers</a></li>
+                    <li><a href="#" class="hover:text-pink-400 transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-pink-400 transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+            <!-- Social -->
+            <div>
+                <h5 class="font-bold text-white text-lg mb-4">Follow Us</h5>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto px-6 mt-12 border-t border-gray-700 pt-8 text-center">
+            <p class="text-gray-400">&copy; 2025 Chic Boutique. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Mouse Tracker Logic ---
+            const tracker = document.getElementById('mouse-tracker');
+            if (tracker) {
+                window.addEventListener('mousemove', (e) => {
+                    // Use requestAnimationFrame for smoother animation
+                    requestAnimationFrame(() => {
+                        tracker.style.left = `${e.clientX}px`;
+                        tracker.style.top = `${e.clientY}px`;
+                    });
+                });
+
+                // Add "click" effect
+                document.body.addEventListener('mousedown', () => {
+                    document.body.classList.add('mouse-down');
+                });
+                document.body.addEventListener('mouseup', () => {
+                    document.body.classList.remove('mouse-down');
+                });
+            }
+
+            // --- Mobile Menu Logic ---
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // --- "Logic-wise" Scroll Animation Logic ---
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            
+            if (animatedElements.length > 0) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            // Optional: unobserve after animation
+                            observer.unobserve(entry.target); // Unobserve once visible
+                        } 
+                    });
+                }, {
+                    threshold: 0.1 // Trigger when 10% of the element is visible
+                });
+
+                animatedElements.forEach(el => {
+                    observer.observe(el);
+                });
+            }
+
+            // --- Simple Cart Logic ---
+            // Note: There are no cart buttons on this page, but we keep the logic for consistency
+            // and initialize the count for the header.
+            const cartCountEl = document.getElementById('cart-count');
+            let cartCount = 0; 
+            
+            // In a real application, you would load the cart count from session/storage here.
+            // For now, we assume it starts at 0 unless explicitly set.
+            if (cartCountEl && cartCountEl.textContent !== "0") {
+                cartCount = parseInt(cartCountEl.textContent) || 0;
+            }
+
+            const cartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+            if (cartButtons.length > 0 && cartCountEl) {
+                cartButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        
+                        cartCount++;
+                        cartCountEl.textContent = cartCount;
+                        
+                        // Add a little "pop" animation to the cart count
+                        cartCountEl.style.transform = 'scale(1.3)';
+                        setTimeout(() => {
+                            cartCountEl.style.transform = 'scale(1)';
+                        }, 150);
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
