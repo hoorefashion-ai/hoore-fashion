@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoore Fashion | Product Details</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #fff;
+      color: #333;
+    }
+    header {
+      background-color: #ffe6f0;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #e91e63;
+    }
+    .product-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 40px;
+      gap: 40px;
+    }
+    .product-images {
+      flex: 1 1 300px;
+      text-align: center;
+    }
+    .product-images img {
+      width: 300px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .product-images img:hover {
+      transform: scale(1.05);
+    }
+    .product-info {
+      flex: 1 1 300px;
+      max-width: 400px;
+    }
+    .product-info h1 {
+      color: #e91e63;
+      font-size: 28px;
+    }
+    .product-info p {
+      line-height: 1.6;
+    }
+    .price {
+      font-size: 22px;
+      font-weight: bold;
+      color: #444;
+      margin: 15px 0;
+    }
+    button {
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #d81b60;
+    }
+
+    /* Popup gallery */
+    .popup {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
+    .popup img {
+      width: 60%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+    .popup span {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 35px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* Similar Products Section */
+    .similar-products {
+      background: #fff5f8;
+      padding: 50px 20px;
+      text-align: center;
+    }
+    .similar-products h2 {
+      color: #e91e63;
+      margin-bottom: 30px;
+    }
+    .product-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 220px;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .product-card h3 {
+      margin: 10px 0 5px;
+      color: #333;
+    }
+    .product-card p {
+      color: #e91e63;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>Hoore Fashion</header>
+
+  <div class="product-container">
+    <div class="product-images">
+      <img id="mainImage" src="" alt="Product Image">
+      <div id="gallery"></div>
+    </div>
+    <div class="product-info">
+      <h1 id="productName"></h1>
+      <p id="productDesc"></p>
+      <div class="price" id="productPrice"></div>
+      <button id="buyBtn">Buy Now</button>
+    </div>
+  </div>
+
+  <!-- Similar Products -->
+  <section class="similar-products">
+    <h2>Similar Products</h2>
+    <div class="product-grid" id="similarGrid"></div>
+  </section>
+
+  <!-- Popup -->
+  <div class="popup" id="popup">
+    <span id="closePopup">&times;</span>
+    <img id="popupImg" src="" alt="Zoomed Image">
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id") || 1;
+
+    async function loadProduct() {
+      const { data: product, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching product:", error);
+        return;
+      }
+
+      document.getElementById("productName").textContent = product.name;
+      document.getElementById("productDesc").textContent = product.description;
+      document.getElementById("productPrice").textContent = "PKR " + product.price;
+      const mainImg = document.getElementById("mainImage");
+      mainImg.src = product.image1_url;
+
+      const gallery = document.getElementById("gallery");
+      const images = [product.image1_url, product.image2_url, product.image3_url].filter(Boolean);
+      gallery.innerHTML = images.map(img => `<img src="${img}" width="70" style="margin:5px;cursor:pointer;border-radius:5px;">`).join("");
+      gallery.querySelectorAll("img").forEach(img => {
+        img.addEventListener("click", () => { mainImg.src = img.src; });
+      });
+
+      const popup = document.getElementById("popup");
+      const popupImg = document.getElementById("popupImg");
+      mainImg.addEventListener("click", () => {
+        popup.style.display = "flex";
+        popupImg.src = mainImg.src;
+      });
+      document.getElementById("closePopup").addEventListener("click", () => {
+        popup.style.display = "none";
+      });
+
+      document.getElementById("buyBtn").addEventListener("click", async () => {
+        const { error: orderError } = await supabase
+          .from("orders")
+          .insert([{ product_id: product.id, product_name: product.name, status: "Pending" }]);
+        if (orderError) {
+          alert("Error placing order");
+          console.error(orderError);
+        } else {
+          alert("Order placed successfully!");
+        }
+      });
+
+      loadSimilarProducts(product.id);
+    }
+
+    async function loadSimilarProducts(currentId) {
+      const { data: products, error } = await supabase
+        .from("products")
+        .select("*")
+        .neq("id", currentId)
+        .limit(3);
+
+      if (error) {
+        console.error("Error fetching similar products:", error);
+        return;
+      }
+
+      const grid = document.getElementById("similarGrid");
+      grid.innerHTML = products.map(p => `
+        <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'">
+          <img src="${p.image1_url}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p>PKR ${p.price}</p>
+        </div>
+      `).join("");
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
